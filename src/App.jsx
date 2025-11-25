@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getAnalytics } from "firebase/analytics"; 
+import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
 import { getFirestore, doc, onSnapshot, runTransaction, setDoc, getDoc } from 'firebase/firestore';
 
-// --- SENİN FIREBASE BİLGİLERİN (Hazırlandı) ---
+// --- SENİN FIREBASE BİLGİLERİN ---
 const firebaseConfig = {
   apiKey: "AIzaSyDyVMgYSwuJgsBS4DnnbdPRtzWfYMI8Pr8",
   authDomain: "worldwariii-3b734.firebaseapp.com",
@@ -15,21 +15,14 @@ const firebaseConfig = {
   measurementId: "G-112QRM4TNZ"
 };
 
-// Uygulamayı Başlat
+// Firebase'i Başlat
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Hata önleyici: Analytics bazen tarayıcı engelleyicilerine takılabilir
-let analytics;
-try {
-  analytics = getAnalytics(app);
-} catch (e) {
-  console.log("Analytics başlatılamadı (önemsiz):", e);
-}
+const appId = 'world-war-game-final-v1'; 
 
-// Veritabanı ayarları
-const appId = 'world-war-game-v1'; 
 const DATA_COLLECTION_NAME = 'globalClickWar';
 const DATA_DOC_ID = 'state';
 
@@ -104,33 +97,34 @@ const CameraDrone = ({ side }) => {
     );
 };
 
-const CliffFood = ({ type }) => {
+const FoodItem = ({ type }) => {
     const isFastFood = type === 'fastfood';
     return (
-        <div className={`absolute bottom-[-60px] ${isFastFood ? 'right-[-90px]' : 'left-[-90px]'} z-10 flex flex-col items-center animate-[bounce_4s_infinite]`}>
-            <div className="relative flex flex-col items-center filter drop-shadow-[0_0_15px_rgba(255,50,0,0.6)] scale-100">
-                {isFastFood ? (
-                    <>
-                         <div className="relative w-20 h-16 bg-yellow-500 clip-path-pizza rotate-12 mb-[-10px] z-0 border-b-4 border-orange-700">
-                            <div className="absolute top-1 left-2 w-3 h-3 bg-red-600 rounded-full"></div><div className="absolute top-4 right-4 w-3 h-3 bg-red-600 rounded-full"></div>
+        // Scale 80% yapıldı ve drop-shadow eklendi
+        <div className="relative flex flex-col items-center filter drop-shadow-[0_0_15px_rgba(255,50,0,0.6)] scale-80">
+            {isFastFood ? (
+                // SAĞ: Fast Food (Xi Düşerse)
+                <div className="flex">
+                    <div className="relative w-20 h-16 bg-yellow-500 clip-path-pizza rotate-12 mb-[-10px] z-0 border-b-4 border-orange-700">
+                        <div className="absolute top-1 left-2 w-3 h-3 bg-red-600 rounded-full"></div><div className="absolute top-4 right-4 w-3 h-3 bg-red-600 rounded-full"></div>
+                    </div>
+                    <div className="flex flex-col items-center z-10">
+                        <div className="w-20 h-14 bg-[#b35900] rounded-t-full border-b-4 border-[#e6b800] relative"><div className="absolute top-1 left-3 w-2 h-1 bg-[#ffe680] rounded-full opacity-70"></div></div>
+                        <div className="w-20 h-3 bg-[#008000] rounded-sm my-[-2px]"></div><div className="w-18 h-6 bg-[#663300] rounded-md"></div><div className="w-20 h-2 bg-[#ffcc00] rounded-sm my-[-2px]"></div><div className="w-20 h-6 bg-[#b35900] rounded-b-xl mt-[-2px]"></div>
+                    </div>
+                </div>
+            ) : (
+                // SOL: Çin Yemeği (Trump Düşerse)
+                <div className="flex">
+                    <div className="relative mb-[-5px] z-20"><div className="w-14 h-8 bg-[#f0e6d2] rounded-t-full border-b-2 border-[#d9c4a3] rotate-12 shadow-sm"></div></div>
+                    <div className="w-16 h-20 bg-white border-2 border-red-700 flex flex-col items-center relative rounded-b-md">
+                        <div className="w-full h-2 bg-red-700"></div><div className="text-xl font-bold text-red-700 mt-2">食</div>
+                        <div className="absolute -top-6 w-12 h-8 flex justify-center overflow-hidden">
+                            <div className="w-1 h-10 bg-[#e6c300] rounded-full mx-[2px] animate-pulse"></div><div className="w-1 h-10 bg-[#e6c300] rounded-full mx-[2px] animate-pulse delay-75"></div><div className="w-1 h-10 bg-[#e6c300] rounded-full mx-[2px] animate-pulse delay-100"></div>
                         </div>
-                        <div className="flex flex-col items-center z-10">
-                            <div className="w-20 h-14 bg-[#b35900] rounded-t-full border-b-4 border-[#e6b800] relative"><div className="absolute top-1 left-3 w-2 h-1 bg-[#ffe680] rounded-full opacity-70"></div></div>
-                            <div className="w-20 h-3 bg-[#008000] rounded-sm my-[-2px]"></div><div className="w-18 h-6 bg-[#663300] rounded-md"></div><div className="w-20 h-2 bg-[#ffcc00] rounded-sm my-[-2px]"></div><div className="w-20 h-6 bg-[#b35900] rounded-b-xl mt-[-2px]"></div>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className="relative mb-[-5px] z-20"><div className="w-14 h-8 bg-[#f0e6d2] rounded-t-full border-b-2 border-[#d9c4a3] rotate-12 shadow-sm"></div></div>
-                        <div className="w-16 h-20 bg-white border-2 border-red-700 flex flex-col items-center relative rounded-b-md">
-                            <div className="w-full h-2 bg-red-700"></div><div className="text-xl font-bold text-red-700 mt-2">食</div>
-                            <div className="absolute -top-6 w-12 h-8 flex justify-center overflow-hidden">
-                                <div className="w-1 h-10 bg-[#e6c300] rounded-full mx-[2px] animate-pulse"></div><div className="w-1 h-10 bg-[#e6c300] rounded-full mx-[2px] animate-pulse delay-75"></div><div className="w-1 h-10 bg-[#e6c300] rounded-full mx-[2px] animate-pulse delay-100"></div>
-                            </div>
-                        </div>
-                    </>
-                )}
-            </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -138,14 +132,8 @@ const CliffFood = ({ type }) => {
 // --- REKLAM BİLEŞENİ (BANNER) ---
 const AdBanner = () => {
     return (
-        <div className="w-full h-[60px] bg-[#222] border-t-2 border-yellow-500/50 flex flex-col items-center justify-center z-50 shrink-0 overflow-hidden relative">
-            <div className="text-white/30 text-xs font-mono tracking-widest uppercase animate-pulse">
-                --- Reklam Alanı (Google Ads) ---
-            </div>
-            <div className="text-[9px] text-white/20">Buraya tıklayarak bize destek olabilirsiniz</div>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-2">
-               <div className="w-8 h-8 bg-blue-500/20 rounded flex items-center justify-center text-blue-300 text-[8px]">AD</div>
-            </div>
+        <div className="w-full h-[60px] bg-[#222] border-t-2 border-yellow-500/50 flex items-center justify-center z-50 shrink-0 overflow-hidden relative">
+            {/* GOOGLE ADSENSE REKLAM KODU BURAYA EKLENECEKTİR */}
         </div>
     );
 };
@@ -156,7 +144,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isClicking, setIsClicking] = useState(null); 
 
-  const MAX_LIMIT = 260; 
+  // Platforma uygun karakter limiti (300px)
+  const MAX_LIMIT = 300; 
   const MOVE_STEP = 5;
 
   const stressLevel = Math.min(Math.abs(gameState.position) / (MAX_LIMIT * 0.9), 0.9);
@@ -207,24 +196,34 @@ export default function App() {
     } catch (e) {}
   };
 
-  if (loading) return <div className="flex h-screen items-center justify-center bg-slate-900 text-slate-400 font-bold">Dünya bağlanıyor...</div>;
+  if (loading) return <div className="flex h-screen items-center justify-center bg-slate-900 text-slate-400 font-bold">Savaş Alanı Yükleniyor...</div>;
 
   return (
+    // FLEX CONTAINER: OYUN VE REKLAM ALANINI DIKEY OLARAK AYIRIR
     <div className="relative w-full h-screen overflow-hidden font-sans select-none bg-slate-900 flex flex-col">
+      
+      {/* --- OYUN ALANI (Ekranın geri kalanı) --- */}
       <div className="relative w-full flex-1 overflow-hidden">
           <Lightning />
           <Rain />
+
+          {/* ARKA PLAN */}
           <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-[#1a0500] z-0">
             <div className="cloud-one absolute top-10 left-[-20%] opacity-20 text-black text-9xl animate-cloud-slow blur-sm grayscale">☁️</div>
             <div className="cloud-two absolute top-32 left-[-10%] opacity-30 text-black text-8xl animate-cloud-fast delay-75 blur-md">☁️</div>
           </div>
+
           <div className="absolute top-24 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-red-600/90 px-4 py-1 rounded-sm shadow-[0_0_15px_rgba(220,38,38,0.6)] z-50 border border-red-400/50 backdrop-blur-sm">
             <div className="w-3 h-3 bg-white rounded-full animate-pulse shadow-[0_0_8px_white]"></div>
             <span className="text-white font-black tracking-[0.2em] text-sm animate-pulse">LIVE</span>
           </div>
+
           <CameraDrone side="left" />
           <CameraDrone side="right" />
+
+          {/* SKORLAR */}
           <div className="absolute top-6 left-0 right-0 z-50 flex justify-between px-6 md:px-24 pointer-events-none">
+            {/* Trump */}
             <div className="flex flex-col items-center gap-2 drop-shadow-[0_0_10px_rgba(255,0,0,0.5)]">
                 <div className="w-16 h-16 rounded-full border-4 border-red-700 bg-[#f5a358] overflow-hidden relative shadow-lg flex items-center justify-center">
                     <div className="absolute top-0 w-full h-6 bg-[#ffcc00] z-10 border-b border-orange-400"></div>
@@ -234,6 +233,7 @@ export default function App() {
                 </div>
                 <span className="text-5xl font-black text-red-500 font-mono tracking-tighter">{formatNumber(gameState.trumpScore)}</span>
             </div>
+            {/* Xi */}
             <div className="flex flex-col items-center gap-2 drop-shadow-[0_0_10px_rgba(255,200,0,0.5)]">
                 <div className="w-16 h-16 rounded-full border-4 border-yellow-700 bg-[#f5d0a9] overflow-hidden relative shadow-lg flex items-center justify-center">
                     <div className="absolute top-0 w-full h-5 bg-[#1a1a1a] z-10"></div>
@@ -244,9 +244,12 @@ export default function App() {
                 <span className="text-5xl font-black text-yellow-500 font-mono tracking-tighter">{formatNumber(gameState.xiScore)}</span>
             </div>
           </div>
+
+          {/* KARAKTERLER VE ZEMİN */}
           <div className="absolute inset-0 flex flex-col justify-end items-center pb-8 z-10">
             <div className="relative flex items-end justify-center transition-transform duration-100 ease-linear will-change-transform" style={{ transform: `translateX(${gameState.position}px)` }}>
               <div className="absolute bottom-[90px] w-24 h-4 bg-black rounded-full z-20 shadow-lg"></div>
+
               {/* TRUMP */}
               <button onClick={() => handlePush('trump')} className={`relative group flex flex-col items-center justify-end w-24 h-56 mx-[-5px] cursor-pointer transition-all active:scale-95 z-30 ${isClicking === 'trump' ? 'brightness-125 -rotate-2' : ''}`}>
                  <Steam intensity={trumpSteam} />
@@ -269,6 +272,7 @@ export default function App() {
                     <div className="w-5 h-8 bg-[#0f172a] rounded-sm"></div><div className="w-5 h-8 bg-[#0f172a] rounded-sm"></div>
                 </div>
               </button>
+
               {/* XI */}
               <button onClick={() => handlePush('xi')} className={`relative group flex flex-col items-center justify-end w-24 h-56 mx-[-5px] cursor-pointer transition-all active:scale-95 z-30 ${isClicking === 'xi' ? 'brightness-125 rotate-2' : ''}`}>
                  <Steam intensity={xiSteam} />
@@ -291,11 +295,24 @@ export default function App() {
                 </div>
               </button>
             </div>
-            <div className="relative w-[95%] md:w-[700px] h-56 mt-[-20px] z-20 flex justify-center drop-shadow-[0_20px_20px_rgba(0,0,0,1)]">
-                <CliffFood type="chinese" />
-                <CliffFood type="fastfood" />
+
+            {/* UÇURUM ZEMİNİ (Yatay Genişlik 800px) */}
+            <div className="relative w-[95%] md:w-[800px] h-56 mt-[-20px] z-20 flex justify-center drop-shadow-[0_20px_20px_rgba(0,0,0,1)]">
+                
+                {/* YEMEK ALANLARI: Platformun kenarlarına sabitlendi. */}
+                {/* SOL YEMEK (Çin) - Platformun Sol Kenarı */}
+                <div className="absolute bottom-[-20px] left-[-150px] z-30 pointer-events-none animate-[bounce_4s_infinite]"> 
+                     <FoodItem type="chinese" /> 
+                </div>
+
+                {/* SAĞ YEMEK (Fast Food) - Platformun Sağ Kenarı */}
+                <div className="absolute bottom-[-20px] right-[-150px] z-30 pointer-events-none animate-[bounce_4s_infinite]"> 
+                     <FoodItem type="fastfood" /> 
+                </div>
+
                 <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[120%] h-40 bg-red-600/20 blur-[60px] animate-pulse pointer-events-none z-0"></div>
                 <div className="w-full h-full bg-[#1a1816] relative overflow-hidden [clip-path:polygon(0_0,100%_0,95%_100%,5%_100%)] rounded-sm shadow-inner border-t border-stone-800">
+                    {/* KIRIK KALP */}
                     <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-24 h-24 z-10">
                         <svg viewBox="0 0 24 24" fill="#ff0000" className="w-full h-full drop-shadow-[0_0_20px_rgba(255,0,0,1)] animate-pulse">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -316,13 +333,19 @@ export default function App() {
                 <div className="absolute -right-4 top-0 h-full w-12 bg-[#141210] [clip-path:polygon(0_0,100%_40%,0_100%)] z-10"></div>
             </div>
           </div>
+
       </div>
+
+      {/* --- DİP NOT ALANI --- */}
       <div className="w-full h-8 bg-[#0a0505] z-10 flex items-center justify-center border-t border-red-900/20 shrink-0">
           <p className="text-red-500/30 text-[10px] uppercase tracking-[0.3em] font-light animate-pulse">
               • Live Global Battle • Synced Worldwide •
           </p>
       </div>
+
+      {/* --- REKLAM ALANI --- */}
       <AdBanner />
+
       <style>{`
         @keyframes cloud-move { from { transform: translateX(0); } to { transform: translateX(100vw); } }
         .animate-cloud-slow { animation: cloud-move 60s linear infinite; }
