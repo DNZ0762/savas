@@ -144,8 +144,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isClicking, setIsClicking] = useState(null); 
 
-  // Platforma uygun karakter limiti (300px)
-  const MAX_LIMIT = 300; 
+  // Platforma uygun karakter limiti (Artan platforma göre ayarlandı)
+  const MAX_LIMIT = 450; 
   const MOVE_STEP = 5;
 
   const stressLevel = Math.min(Math.abs(gameState.position) / (MAX_LIMIT * 0.9), 0.9);
@@ -231,7 +231,7 @@ export default function App() {
                         <div className="w-2 h-2 bg-black rounded-full"></div><div className="w-2 h-2 bg-black rounded-full"></div>
                     </div>
                 </div>
-                <span className="text-5xl font-black text-red-500 font-mono tracking-tighter">{formatNumber(gameState.trumpScore)}</span>
+                <span className="text-4xl sm:text-5xl font-black text-red-500 font-mono tracking-tighter">{formatNumber(gameState.trumpScore)}</span>
             </div>
             {/* Xi */}
             <div className="flex flex-col items-center gap-2 drop-shadow-[0_0_10px_rgba(255,200,0,0.5)]">
@@ -241,7 +241,7 @@ export default function App() {
                         <div className="w-2 h-0.5 bg-black"></div><div className="w-2 h-0.5 bg-black"></div>
                     </div>
                 </div>
-                <span className="text-5xl font-black text-yellow-500 font-mono tracking-tighter">{formatNumber(gameState.xiScore)}</span>
+                <span className="text-4xl sm:text-5xl font-black text-yellow-500 font-mono tracking-tighter">{formatNumber(gameState.xiScore)}</span>
             </div>
           </div>
 
@@ -296,17 +296,17 @@ export default function App() {
               </button>
             </div>
 
-            {/* UÇURUM ZEMİNİ (Yatay Genişlik 800px) */}
-            <div className="relative w-[95%] md:w-[800px] h-56 mt-[-20px] z-20 flex justify-center drop-shadow-[0_20px_20px_rgba(0,0,0,1)]">
+            {/* UÇURUM ZEMİNİ (Yatay Genişlik 1100px) */}
+            <div className="relative w-[95%] md:w-[1100px] h-56 mt-[-20px] z-20 flex justify-center drop-shadow-[0_20px_20px_rgba(0,0,0,1)]">
                 
                 {/* YEMEK ALANLARI: Platformun kenarlarına sabitlendi. */}
-                {/* SOL YEMEK (Çin) - Platformun Sol Kenarı */}
-                <div className="absolute bottom-[-20px] left-[-150px] z-30 pointer-events-none animate-[bounce_4s_infinite]"> 
+                {/* SOL YEMEK (Çin) - Platformun Sol Kenarı (Mobile ve Desktop ayarı) */}
+                <div className="absolute bottom-[-20px] left-[-60px] md:left-[-150px] z-30 pointer-events-none animate-[bounce_4s_infinite]"> 
                      <FoodItem type="chinese" /> 
                 </div>
 
-                {/* SAĞ YEMEK (Fast Food) - Platformun Sağ Kenarı */}
-                <div className="absolute bottom-[-20px] right-[-150px] z-30 pointer-events-none animate-[bounce_4s_infinite]"> 
+                {/* SAĞ YEMEK (Fast Food) - Platformun Sağ Kenarı (Mobile ve Desktop ayarı) */}
+                <div className="absolute bottom-[-20px] right-[-60px] md:right-[-150px] z-30 pointer-events-none animate-[bounce_4s_infinite]"> 
                      <FoodItem type="fastfood" /> 
                 </div>
 
